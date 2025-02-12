@@ -1,0 +1,162 @@
+Suggestion:
+(D:/Documents/GitHub/test-aroma-cpp/example/complex_functions_1.cpp, complexFunction1, 2, 6, calculatePositiveSum)
+
+Refactored Code:
+```cpp
+int calculatePositiveSum(int a, int b, int c) {
+    int result = 0;
+    if (a > 0 && b > 0 && c > 0) {
+        result += a + b + c;
+    }
+    return result;
+}
+
+int complexFunction1(int a, int b, int c) {
+    int result = calculatePositiveSum(a, b, c);
+    return result;
+}
+```
+
+Suggestion:
+(D:/Documents/GitHub/test-aroma-cpp/example/complex_functions_1.cpp, complexFunction2, 2, 6, calculatePositiveSum)
+
+Refactored Code:
+
+```cpp
+int calculatePositiveSum(int a, int b, int c) {
+    int result = 0;
+    if (a > 0) {
+        if (b > 0) {
+            if (c > 0) {
+                result += a + b + c;
+            }
+        }
+    }
+    return result;
+}
+
+// Original function
+int complexFunction2(int a, int b, int c) {
+    int result = calculatePositiveSum(a, b, c);
+    // Other code...
+    return result;
+}
+```
+
+Suggestion:
+(D:/Documents/GitHub/test-aroma-cpp/example/complex_functions_1.cpp, complexFunction3, 2, 6, calculateResult)
+
+Refactored code:
+
+```cpp
+int calculateResult(int a, int b) {
+    int result = 1;
+    while (a > 0 && b > 0) {
+        if (a % 2 == 0 && b % 3 == 0) {
+            result += a - b;
+        }
+    }
+    return result;
+}
+```
+
+Original function after refactoring:
+
+```cpp
+int complexFunction3(int a, int b) {
+    return calculateResult(a, b);
+}
+```
+
+Suggestion:
+(D:/Documents/GitHub/test-aroma-cpp/example/complex_functions_2.cpp, complexFunction5, 2, 6, countDivisors)
+
+Refactored Code:
+
+```cpp
+int countDivisors(int n) {
+    int total = 0;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= i; j++) {
+            if (i % j == 0) {
+                total++;
+            }
+        }
+    }
+    return total;
+}
+
+// Original function
+int complexFunction5(int n) {
+    return countDivisors(n);
+}
+```
+
+Suggestion:
+(D:/Documents/GitHub/test-aroma-cpp/example/complex_functions_3.cpp, complexFunction7, 2, 8, handleCharacterCases)
+
+Refactoring:
+
+```cpp
+int handleCharacterCases(char c, int value) {
+    switch (c) {
+        case 'a': value += 1; break;
+        case 'b': value += 2; break;
+        case 'c': value += 3; break;
+    }
+    return value;
+}
+
+int value = 0;
+for (char c : str) {
+    value = handleCharacterCases(c, value);
+    if (c == 'd') {
+        if (value % 2 == 0) {
+            value *= 2;
+        }
+    }
+}
+```
+
+Suggestion:
+(D:/Documents/GitHub/test-aroma-cpp/example/complex_functions_3.cpp, complexFunction8, 2, 6, processLoop)
+
+Refactored Code:
+
+```cpp
+int processLoop(int p, int q) {
+    int res = 0;
+    for (int i = 0; i < p; i++) {
+        if (i % 4 == 0) {
+            res += q;
+        }
+    }
+    return res;
+}
+
+// Usage in complexFunction8
+int res = processLoop(p, q);
+```
+
+(D:/Documents/GitHub/test-aroma-cpp/example/complex_functions_3.cpp, complexFunction9, 2, 6, calculateResult)
+
+```cpp
+int calculateResult(int m, int n, int o) {
+    int result = 0;
+    if (m > n) {
+        if (n > o) {
+            result += m * n;
+        }
+    }
+    return result;
+}
+```
+
+Refactored code:
+
+```cpp
+int complexFunction9(int m, int n, int o) {
+    return calculateResult(m, n, o);
+}
+```
+

@@ -2,19 +2,38 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+async function getModelWithRetry(retries: number, delay: number): Promise<vscode.LanguageModelChat | null> {
+    for (let i = 0; i < retries; i++) {
+        const [model] = await vscode.lm.selectChatModels({ vendor: 'copilot', family: 'gpt-4o' });
+        if (model) {
+            return model;
+        }
+        await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    return null;
+}
+
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerTextEditorCommand('aroma-cpp.suggestRefactorings', async (textEditor: vscode.TextEditor) => {		  
-		    const [model] = await vscode.lm.selectChatModels({vendor: 'copilot', family: 'gpt-4o'});
+		    // Initialize the model and wait for it to be ready
+            const model = await getModelWithRetry(10, 1000);
+
+            // Check if the model has been initialized
+            if (!model) {
+                vscode.window.showErrorMessage('Failed to initialize the model.');
+                return;
+            }
+
             let messages = [];
 
 		    try {
 		    	let instruction_message = vscode.LanguageModelChatMessage.User(
-		    	    //'You are a refactoring helper. Your job is to suggest applications of the extract method refactoring technique to reduce the cyclomatic complexity of the code to be below 5 per function. Your suggestions must be in the following format: (file_name, function_name, start_line, end_line, name_extracted_function). Return only the suggestions.'
-                    'You are a refactoring assistant. Your task is to suggest one or more applications of the extract method refactoring technique to reduce the cyclomatic complexity of functions. The cyclomatic complexity of the refactored code should be lower than 5. For each suggestion, provide the starting and ending line numbers of the code to be extracted, and the name of the new extracted function. Format your suggestions as follows: (start_line, end_line, name_extracted_function). Return only the suggestions.'
+                    'You are a refactoring assistant. Your task is to suggest applications of the extract method refactoring technique to reduce the cyclomatic complexity of functions. For each suggestion, provide the starting and ending line numbers of the code to be extracted, and the name of the new extracted function. Format your suggestions as follows: (start_line, end_line, name_extracted_function). Return only the suggestions.'
+                    //'Suggest applications of the extract method refactoring technique to reduce the cyclomatic complexity of functions. For each suggestion, provide the starting and ending line numbers of the code to be extracted, and the name of the new extracted function. Return only the suggestions.'
                 );
 
                 // Path to the high_cc.txt file
-                const highCCFilePath = 'c:/Users/20202715/OneDrive/Documenten/Graduation Project/Test/aroma-cpp/src/high_cc.txt';
+                const highCCFilePath = 'D:/Documents/GitHub/test-aroma-cpp/src/high_cc.txt';
 
                 // Read the high_cc.txt file
                 const highCCContent = fs.readFileSync(highCCFilePath, 'utf8');
@@ -46,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
                         const overlappingFunction = matchedFunctions.find(func => func.name === entry.functionName);
 
                         if (overlappingFunction) {
-                            messages.push(`${overlappingFunction.body}`);
+                            messages.push([`${entry.filePath}`, `${overlappingFunction.name}`, `${overlappingFunction.body}`]);
                         }
                     } else {
                         vscode.window.showWarningMessage(`File not found: ${entry.filePath}`);
@@ -57,7 +76,9 @@ export function activate(context: vscode.ExtensionContext) {
                 const chatResponses = [];
                 try {
                     for (const message of messages) {
-                        const response = await model.sendRequest([instruction_message, vscode.LanguageModelChatMessage.User(message)], {}, new vscode.CancellationTokenSource().token);
+                        const response = await model.sendRequest([vscode.LanguageModelChatMessage.User(
+                            `You are a refactoring assistant. Your task is to suggest applications of the extract method refactoring technique to reduce the cyclomatic complexity of functions. For each suggestion provide the starting and ending line numbers of the code to be extracted, and the name of the new extracted function. Format your suggestions as follows: (${message[0]}, ${message[1]}, start_line, end_line, name_extracted_function). Return both the suggestion and the suggested refactoring. You can give multiple suggestions per function if needed. Here is the code you need to refactor:\n\n`
+                            + message[2])], {}, new vscode.CancellationTokenSource().token);
                         chatResponses.push(response);
                     }
                 } catch (err) {
@@ -70,8 +91,8 @@ export function activate(context: vscode.ExtensionContext) {
                 }
 
 		        // Write the response to RefactoringSuggestions.txt
-		        const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '.';
-		        const filePath = path.join(workspaceFolder, 'RefactoringSuggestions.txt');
+		        // const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '.';
+		        const filePath = path.join('D:/Documents/GitHub/test-aroma-cpp/src/RefactoringSuggestions.txt');
 		        try {
                     let output = '';
                     for (const chatResponse of chatResponses) {
