@@ -14,6 +14,32 @@ async function getModelWithRetry(retries: number, delay: number): Promise<vscode
 }
 
 export function activate(context: vscode.ExtensionContext) {
+    // Register the runTics command
+    let test = vscode.commands.registerTextEditorCommand('aroma-cpp.runTics', async (textEditor: vscode.TextEditor) => {
+        const highCCFilePath2 = 'D:/Documents/GitHub/test-aroma-cpp/src/high_cc2.txt';
+        const completionFilePath = 'D:/Documents/GitHub/test-aroma-cpp/src/completion.txt';
+
+        // Open a new terminal and send the command
+        let t = vscode.window.createTerminal();
+        t.sendText(`ping -n 10 www.google.com > ${highCCFilePath2}; echo done > ${completionFilePath}`);
+
+        // Wait for the command to finish
+        await new Promise<void>((resolve) => {
+            const interval = setInterval(() => {
+                if (fs.existsSync(completionFilePath)) {
+                    clearInterval(interval);
+                    fs.unlinkSync(completionFilePath);
+                    resolve();
+                }
+            }, 1000);
+        });
+
+        // Dispose of the terminal
+        t.dispose();
+    });
+    context.subscriptions.push(test);
+
+    // Register the suggestRefactorings command
     let disposable = vscode.commands.registerTextEditorCommand('aroma-cpp.suggestRefactorings', async (textEditor: vscode.TextEditor) => {		  
 		    // Initialize the model and wait for it to be ready
             const model = await getModelWithRetry(10, 1000);

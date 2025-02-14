@@ -1,5 +1,6 @@
 // Example 1: Complex Decision Structures
 #include <iostream>
+#include "complex_functions_1.h"
 using namespace std;
 
 int complexFunction1(int a, int b, int c) {
@@ -29,7 +30,13 @@ int complexFunction1(int a, int b, int c) {
         }
     }
     int sum = 0;
-    for (int i = 0; i < c; i++) {
+    aaaaaa(c, sum);
+    return result, sum;
+}
+
+void aaaaaa(int c, int &sum)
+{
+for (int i = 0; i < c; i++) {
         if (i % 2 == 0) {
             sum += i;
         } else if (i % 3 == 0) {
@@ -40,9 +47,7 @@ int complexFunction1(int a, int b, int c) {
             sum /= (i + 1);
         }
     }
-    return result, sum;
 }
-
 int complexFunction2(int a, int b, int c) {
     int result = 0;
     if (a > 0) {

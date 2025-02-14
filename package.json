@@ -16,6 +16,10 @@
       {
         "command": "aroma-cpp.suggestRefactorings",
         "title": "aroma-cpp.suggestRefactorings"
+      },
+      {
+        "command": "aroma-cpp.runTics",
+        "title": "aroma-cpp.runTics"
       }
     ]
   },
